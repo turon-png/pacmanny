@@ -2,93 +2,88 @@ import copy
 import pygame
 import math
 import sys
+import os
+import welcome  # Importing welcome.py
+from board import boards
 
-# Import the 'boards' module properly
-try:
-    import boards
-except ImportError:
-    print("Error: 'boards.py' file not found. Make sure it is in the same directory as 'pacman.py'.")
+# Ensure Python recognizes the current directory
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-# Initialize Pygame
 pygame.init()
 
-# Screen dimensions
 WIDTH = 900
 HEIGHT = 950
 screen = pygame.display.set_mode([WIDTH, HEIGHT])
 timer = pygame.time.Clock()
 fps = 60
 
-# Font setup
-font = pygame.font.Font('freesansbold.ttf', 20)
-font_small = pygame.font.SysFont("Arial", 30)
+# Load a better-looking font
+font = pygame.font.Font('freesansbold.ttf', 30)  # Adjusted font size for better visibility
 
-# Colors
-WHITE = (255, 255, 255)
-YELLOW = (255, 255, 0)
-BLACK = (0, 0, 0)
+# Change background color to white
+screen.fill((255, 255, 255))
 
-# Initialize player and ghost images
-player_images = [pygame.transform.scale(pygame.image.load(f'assets/player_images/{i}.png'), (45, 45)) for i in range(1, 5)]
+# Display the welcome screen
+welcome.display_welcome_message(screen, font)
+pygame.time.delay(500)  # Ensure screen updates before waiting for input
+
+# Wait for user input to start the game
+if not welcome.wait_for_user_input():
+    pygame.quit()
+    quit()
+
+level = copy.deepcopy(boards)
+color = 'blue'
+PI = math.pi
+player_images = []
+for i in range(1, 5):
+    player_images.append(pygame.transform.scale(pygame.image.load(f'assets/player_images/{i}.png'), (45, 45)))
 blinky_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/red.png'), (45, 45))
 pinky_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/pink.png'), (45, 45))
 inky_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/blue.png'), (45, 45))
 clyde_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/orange.png'), (45, 45))
 spooked_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/powerup.png'), (45, 45))
 dead_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/dead.png'), (45, 45))
-
-# Initialize level data (assuming `boards` is defined in another file)
-level = copy.deepcopy(board.board)  # Ensure you're accessing the correct variable from the 'boards' module
-
-# Game variables
 player_x = 450
 player_y = 663
 direction = 0
+blinky_x = 56
+blinky_y = 58
+blinky_direction = 0
+inky_x = 440
+inky_y = 388
+inky_direction = 2
+pinky_x = 440
+pinky_y = 438
+pinky_direction = 2
+clyde_x = 440
+clyde_y = 438
+clyde_direction = 2
+counter = 0
+flicker = False
+# R, L, U, D
+turns_allowed = [False, False, False, False]
+direction_command = 0
+player_speed = 2
 score = 0
+powerup = False
+power_counter = 0
+eaten_ghost = [False, False, False, False]
+targets = [(player_x, player_y), (player_x, player_y), (player_x, player_y), (player_x, player_y)]
+blinky_dead = False
+inky_dead = False
+clyde_dead = False
+pinky_dead = False
+blinky_box = False
+inky_box = False
+clyde_box = False
+pinky_box = False
+moving = False
+ghost_speeds = [2, 2, 2, 2]
+startup_counter = 0
 lives = 3
 game_over = False
 game_won = False
-
-# Welcome class for the start screen
-class Welcome:
-    def __init__(self):
-        self.running = True
-
-    def display(self):
-        # Main loop for the welcome screen
-        while self.running:
-            screen.fill(BLACK)  # Fill screen with black
-
-            # Render welcome and instruction text
-            welcome_text = font.render("Welcome to Pacman!", True, YELLOW)
-            instruction_text = font_small.render("Press Enter to Start", True, WHITE)
-            screen.blit(welcome_text, (WIDTH // 2 - welcome_text.get_width() // 2, HEIGHT // 3))
-            screen.blit(instruction_text, (WIDTH // 2 - instruction_text.get_width() // 2, HEIGHT // 2))
-
-            pygame.display.update()
-
-            # Event handling
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    self.running = False
-                    pygame.quit()
-                    sys.exit()
-
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_RETURN:  # If Enter key is pressed
-                        self.running = False  # Exit the welcome screen
-                        self.start_game()
-
-    def start_game(self):
-        # Start your game logic after the welcome screen here
-        print("Game Starting...")
-        # You can initialize or call your game class here
-
-# Run the welcome screen
-if __name__ == "__main__":
-    welcome_screen = Welcome()
-    welcome_screen.display()
-
 
 class Ghost:
     def __init__(self, x_coord, y_coord, target, speed, img, direct, dead, box, id):

@@ -85,6 +85,7 @@ lives = 3
 game_over = False
 game_won = False
 
+
 class Ghost:
     def __init__(self, x_coord, y_coord, target, speed, img, direct, dead, box, id):
         self.x_pos = x_coord

@@ -159,4 +159,3 @@ def select_difficulty(screen, font):
                     return "Medium"
                 elif event.key == pygame.K_3:
                     return "Hard"
-

@@ -3,10 +3,10 @@ import pygame
 import math
 import sys
 import os
-import welcome  # Importing welcome.py
-from board import boards
+import welcome  # make sure welcome.py is in the same directory
+from board import boards  # you must have a board.py with a variable `boards`
 
-# Ensure Python recognizes the current directory
+# Ensure Python recognizes current directory
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 pygame.init()
@@ -14,24 +14,39 @@ pygame.init()
 WIDTH = 900
 HEIGHT = 950
 screen = pygame.display.set_mode([WIDTH, HEIGHT])
+pygame.display.set_caption("Pacman")
 timer = pygame.time.Clock()
 fps = 60
 
-# Load a better-looking font
-font = pygame.font.Font('freesansbold.ttf', 30)  # Adjusted font size for better visibility
+# Load a readable font
+font = pygame.font.Font('freesansbold.ttf', 30)
 
-# Change background color to white
-screen.fill((255, 255, 255))
+# Ask for player name first
+player_name = welcome.get_player_name(screen, font)
 
-# Display the welcome screen
-welcome.display_welcome_message(screen, font)
-pygame.time.delay(500)  # Ensure screen updates before waiting for input
+# Then show personalized welcome screen
+welcome.display_welcome_message(screen, font, player_name)
+welcome.wait_for_user_input()
 
-# Wait for user input to start the game
-if not welcome.wait_for_user_input():
-    pygame.quit()
-    quit()
+# Show difficulty selection screen
+difficulty = welcome.select_difficulty(screen, font)
+print(f"Selected difficulty: {difficulty}")
 
+# Adjust game settings based on difficulty
+if difficulty == "Easy":
+    player_speed = 4
+    ghost_speeds = [1, 1, 1, 1]
+    lives = 5
+elif difficulty == "Medium":
+    player_speed = 3
+    ghost_speeds = [2, 2, 2, 2]
+    lives = 3
+elif difficulty == "Hard":
+    player_speed = 2
+    ghost_speeds = [4, 4, 4, 4]
+    lives = 2
+
+# Continue game setup
 level = copy.deepcopy(boards)
 color = 'blue'
 PI = math.pi
@@ -44,6 +59,7 @@ inky_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/blue.p
 clyde_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/orange.png'), (45, 45))
 spooked_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/powerup.png'), (45, 45))
 dead_img = pygame.transform.scale(pygame.image.load(f'assets/ghost_images/dead.png'), (45, 45))
+
 player_x = 450
 player_y = 663
 direction = 0
@@ -59,17 +75,16 @@ pinky_direction = 2
 clyde_x = 440
 clyde_y = 438
 clyde_direction = 2
+
 counter = 0
 flicker = False
-# R, L, U, D
 turns_allowed = [False, False, False, False]
 direction_command = 0
-player_speed = 2
 score = 0
 powerup = False
 power_counter = 0
 eaten_ghost = [False, False, False, False]
-targets = [(player_x, player_y), (player_x, player_y), (player_x, player_y), (player_x, player_y)]
+targets = [(player_x, player_y)] * 4
 blinky_dead = False
 inky_dead = False
 clyde_dead = False
@@ -79,9 +94,7 @@ inky_box = False
 clyde_box = False
 pinky_box = False
 moving = False
-ghost_speeds = [2, 2, 2, 2]
 startup_counter = 0
-lives = 3
 game_over = False
 game_won = False
 
